@@ -1,0 +1,111 @@
+.infoBox {
+    padding: 16px;
+    background: rgba(88, 101, 242, 0.1);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.formCard {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.formRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.formRow:last-of-type {
+    border-bottom: none;
+}
+
+.formLabel {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.input {
+    width: 200px;
+    padding: 10px 14px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.saveBtn {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.saveBtn:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.saveBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.categoryHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.commandGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.commandCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.commandName {
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.toggle.small {
+    width: 40px;
+    height: 22px;
+}
+
+.toggle.small .toggleKnob {
+    width: 16px;
+    height: 16px;
+}
+
+.toggle.small.active .toggleKnob {
+    transform: translateX(18px);
+}

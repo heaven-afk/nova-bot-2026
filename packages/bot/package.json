@@ -1,0 +1,23 @@
+{
+    "name": "@nova/bot",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "main": "dist/index.js",
+    "scripts": {
+        "dev": "tsx watch src/index.ts",
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "register": "tsx src/scripts/register.ts",
+        "lint": "eslint src --ext .ts"
+    },
+    "dependencies": {
+        "discord.js": "^14.14.1",
+        "dotenv": "^16.3.1"
+    },
+    "devDependencies": {
+        "@types/node": "^20.10.6",
+        "tsx": "^4.7.0",
+        "typescript": "^5.3.3"
+    }
+}

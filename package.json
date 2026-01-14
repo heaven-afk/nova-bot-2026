@@ -1,0 +1,21 @@
+{
+  "name": "nova-bot-2026",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:bot": "npm run dev -w @nova/bot",
+    "dev:backend": "npm run dev -w @nova/backend",
+    "dev:dashboard": "npm run dev -w @nova/dashboard",
+    "build": "npm run build -w @nova/bot && npm run build -w @nova/backend && npm run build -w @nova/dashboard",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -60,7 +60,7 @@ export default function ModerationPage() {
                 ...currentMod,
                 modRoles,
                 adminRoles,
-                logChannel: logChannelInput || null,
+                logChannel: logChannelInput || undefined,
                 autoTimeout: {
                     ...currentAutoTimeout,
                     enabled: autoTimeoutEnabled,

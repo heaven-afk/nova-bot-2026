@@ -44,9 +44,9 @@ export default function LoggingPage() {
                 ...config.logging,
                 channels: {
                     ...currentChannels,
-                    moderation: modLogChannel || null,
-                    messages: msgLogChannel || null,
-                    members: memberLogChannel || null,
+                    moderation: modLogChannel || undefined,
+                    messages: msgLogChannel || undefined,
+                    members: memberLogChannel || undefined,
                 },
             },
         });

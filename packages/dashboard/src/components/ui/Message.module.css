@@ -1,0 +1,69 @@
+.message {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.icon {
+    flex-shrink: 0;
+}
+
+.text {
+    flex: 1;
+}
+
+.dismiss {
+    background: none;
+    border: none;
+    color: inherit;
+    opacity: 0.7;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.dismiss:hover {
+    opacity: 1;
+}
+
+.success {
+    background: rgba(87, 242, 135, 0.15);
+    color: #57f287;
+    border: 1px solid rgba(87, 242, 135, 0.3);
+}
+
+.error {
+    background: rgba(237, 66, 69, 0.15);
+    color: #ed4245;
+    border: 1px solid rgba(237, 66, 69, 0.3);
+}
+
+.warning {
+    background: rgba(250, 166, 26, 0.15);
+    color: #faa61a;
+    border: 1px solid rgba(250, 166, 26, 0.3);
+}
+
+.info {
+    background: rgba(88, 101, 242, 0.15);
+    color: #5865f2;
+    border: 1px solid rgba(88, 101, 242, 0.3);
+}

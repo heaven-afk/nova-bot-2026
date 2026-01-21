@@ -1,0 +1,56 @@
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.field.horizontal {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.field.horizontal .labelContainer {
+    flex: 1;
+}
+
+.field.horizontal .inputContainer {
+    flex-shrink: 0;
+}
+
+.labelContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary, #e0e0e0);
+}
+
+.required {
+    color: var(--error, #ed4245);
+    margin-left: 0.25rem;
+}
+
+.description {
+    font-size: 0.8rem;
+    color: var(--text-secondary, #a0a0a0);
+}
+
+.inputContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.error {
+    font-size: 0.8rem;
+    color: var(--error, #ed4245);
+}
+
+.hasError .label {
+    color: var(--error, #ed4245);
+}

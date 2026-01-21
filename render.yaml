@@ -1,0 +1,55 @@
+# Render Blueprint - Nova Bot
+# This file configures automatic deployment on Render
+
+services:
+  # Backend API Service
+  - type: web
+    name: nova-bot-backend
+    runtime: node
+    rootDir: packages/backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false  # Set manually in Render dashboard
+      - key: JWT_SECRET
+        generateValue: true
+      - key: INTERNAL_API_KEY
+        generateValue: true
+      - key: DISCORD_CLIENT_ID
+        sync: false
+      - key: DISCORD_CLIENT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false  # Set to your Vercel dashboard URL
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: nova-bot-backend
+          property: host
+    healthCheckPath: /health
+
+  # Discord Bot Service (Background Worker)
+  - type: worker
+    name: nova-bot
+    runtime: node
+    rootDir: packages/bot
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DISCORD_TOKEN
+        sync: false  # Set manually in Render dashboard
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: nova-bot-backend
+          property: host
+      - key: INTERNAL_API_KEY
+        fromService:
+          type: web
+          name: nova-bot-backend
+          envVarKey: INTERNAL_API_KEY

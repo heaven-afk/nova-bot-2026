@@ -1,4 +1,12 @@
-import { EmbedBuilder, Colors } from 'discord.js';
+import {
+    EmbedBuilder,
+    Colors,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    StringSelectMenuBuilder,
+    StringSelectMenuOptionBuilder,
+} from 'discord.js';
 import { createCommand } from '../../types/Command.js';
 
 export default createCommand(
@@ -51,7 +59,7 @@ export default createCommand(
             return;
         }
 
-        // Show all commands by category
+        // Show all commands with interactive buttons and select menu
         const categories = new Map<string, string[]>();
 
         client.commands.forEach((cmd) => {
@@ -62,12 +70,6 @@ export default createCommand(
             categories.get(cat)!.push(cmd.data.name);
         });
 
-        const embed = new EmbedBuilder()
-            .setColor(Colors.Blurple)
-            .setTitle('📚 Commands')
-            .setDescription('Use `/help <command>` for detailed information.')
-            .setTimestamp();
-
         const categoryEmojis: Record<string, string> = {
             mod: '🛡️',
             admin: '⚙️',
@@ -75,14 +77,78 @@ export default createCommand(
             roles: '👥',
         };
 
+        // Main embed
+        const embed = new EmbedBuilder()
+            .setColor(Colors.Blurple)
+            .setTitle('📚 Nova Bot Commands')
+            .setDescription(
+                'Click a **button** to view commands by category, or use the **dropdown** to get details on a specific command.\n\n' +
+                `**Total Commands:** ${client.commands.size}`
+            )
+            .setThumbnail(client.user?.displayAvatarURL() || '')
+            .setFooter({ text: 'Tip: Use /help <command> for quick access' })
+            .setTimestamp();
+
+        // Add category summaries
         categories.forEach((commands, category) => {
             const emoji = categoryEmojis[category] || '📁';
             embed.addFields({
-                name: `${emoji} ${category.charAt(0).toUpperCase() + category.slice(1)}`,
-                value: commands.map((c) => `\`${c}\``).join(', '),
+                name: `${emoji} ${category.charAt(0).toUpperCase() + category.slice(1)} (${commands.length})`,
+                value: commands.slice(0, 5).map((c) => `\`${c}\``).join(', ') +
+                    (commands.length > 5 ? ` +${commands.length - 5} more` : ''),
+                inline: true,
             });
         });
 
-        await interaction.reply({ embeds: [embed] });
+        // Category buttons row
+        const buttonRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
+                .setCustomId('help_category:mod')
+                .setLabel('Moderation')
+                .setEmoji('🛡️')
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId('help_category:utility')
+                .setLabel('Utility')
+                .setEmoji('🔧')
+                .setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder()
+                .setCustomId('help_category:admin')
+                .setLabel('Admin')
+                .setEmoji('⚙️')
+                .setStyle(ButtonStyle.Secondary),
+            new ButtonBuilder()
+                .setCustomId('help_category:roles')
+                .setLabel('Roles')
+                .setEmoji('👥')
+                .setStyle(ButtonStyle.Secondary)
+        );
+
+        // Command select menu
+        const selectOptions: StringSelectMenuOptionBuilder[] = [];
+        client.commands.forEach((cmd) => {
+            if (selectOptions.length < 25) {
+                // Discord limit
+                selectOptions.push(
+                    new StringSelectMenuOptionBuilder()
+                        .setLabel(`/${cmd.data.name}`)
+                        .setDescription(cmd.data.description.slice(0, 100))
+                        .setValue(cmd.data.name)
+                        .setEmoji(categoryEmojis[cmd.options.category] || '📁')
+                );
+            }
+        });
+
+        const selectRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+            new StringSelectMenuBuilder()
+                .setCustomId('help_select')
+                .setPlaceholder('🔍 Select a command for details...')
+                .addOptions(selectOptions)
+        );
+
+        await interaction.reply({
+            embeds: [embed],
+            components: [buttonRow, selectRow],
+        });
     }
 );

@@ -1,0 +1,74 @@
+.page {
+    padding: 0 0 80px 0;
+}
+
+.header {
+    margin-bottom: 2rem;
+}
+
+.header h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-primary, #ffffff);
+    margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+    font-size: 0.95rem;
+    color: var(--text-secondary, #a0a0a0);
+    margin: 0;
+}
+
+.loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border, #3a3a3a);
+    border-top-color: var(--primary, #5865f2);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.error {
+    text-align: center;
+    color: var(--error, #ed4245);
+    padding: 2rem;
+}
+
+.infoBox {
+    background: rgba(88, 101, 242, 0.1);
+    border: 1px solid rgba(88, 101, 242, 0.2);
+    border-radius: 8px;
+    padding: 0.875rem 1rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary, #a0a0a0);
+    margin-top: 0.5rem;
+}
+
+.eventGrid {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.eventCard {
+    background: var(--card-bg-secondary, #252525);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid var(--border, #2a2a2a);
+}
+
+.eventCard:hover {
+    border-color: var(--border-hover, #3a3a3a);
+}

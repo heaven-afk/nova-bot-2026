@@ -1,110 +1,101 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { api, GuildConfig } from '@/lib/api';
-import styles from '../page.module.css';
+import { useSettingsForm } from '@/hooks/useSettingsForm';
+import { loggingSchema, LoggingConfig, loggingDefaults } from '@/lib/schemas';
+import { FormSection, FormField, Toggle, Input, SaveBar, Message } from '@/components/ui';
+import styles from './page.module.css';
 
 export default function LoggingPage() {
     const params = useParams();
     const guildId = params.guildId as string;
-    const [config, setConfig] = useState<GuildConfig | null>(null);
     const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const [originalConfig, setOriginalConfig] = useState<GuildConfig | null>(null);
 
-    // Channel state
-    const [modLogChannel, setModLogChannel] = useState('');
-    const [msgLogChannel, setMsgLogChannel] = useState('');
-    const [memberLogChannel, setMemberLogChannel] = useState('');
+    // Initialize form with defaults, will be updated after loading
+    const form = useSettingsForm<LoggingConfig>(loggingDefaults, {
+        schema: loggingSchema,
+        onSave: async (value) => {
+            const result = await api.guilds.updateConfig(guildId, {
+                logging: {
+                    enabled: value.enabled,
+                    channels: {
+                        moderation: value.channels.moderation || undefined,
+                        messages: value.channels.messages || undefined,
+                        members: value.channels.members || undefined,
+                    },
+                    events: value.events,
+                },
+            });
+
+            if (result.data) {
+                setOriginalConfig(result.data);
+                setMessage({ type: 'success', text: 'Settings saved successfully!' });
+                return true;
+            } else {
+                setMessage({ type: 'error', text: result.error || 'Failed to save settings' });
+                return false;
+            }
+        },
+    });
+
+    const loadConfig = useCallback(async () => {
+        const result = await api.guilds.getConfig(guildId);
+        if (result.data) {
+            setOriginalConfig(result.data);
+            const logging = result.data.logging || loggingDefaults;
+            form.setValue({
+                enabled: logging.enabled ?? false,
+                channels: {
+                    moderation: logging.channels?.moderation || '',
+                    messages: logging.channels?.messages || '',
+                    members: logging.channels?.members || '',
+                },
+                events: {
+                    messageDelete: logging.events?.messageDelete ?? true,
+                    messageEdit: logging.events?.messageEdit ?? true,
+                    memberJoin: logging.events?.memberJoin ?? true,
+                    memberLeave: logging.events?.memberLeave ?? true,
+                    modActions: logging.events?.modActions ?? true,
+                },
+            });
+            form.markSaved(); // Mark as not dirty after loading
+        }
+        setLoading(false);
+    }, [guildId]);
 
     useEffect(() => {
         loadConfig();
-    }, [guildId]);
+    }, [loadConfig]);
 
-    async function loadConfig() {
-        const result = await api.guilds.getConfig(guildId);
-        if (result.data) {
-            setConfig(result.data);
-            setModLogChannel(result.data.logging?.channels?.moderation || '');
-            setMsgLogChannel(result.data.logging?.channels?.messages || '');
-            setMemberLogChannel(result.data.logging?.channels?.members || '');
+    const handleSave = async () => {
+        const success = await form.save();
+        if (success) {
+            setTimeout(() => setMessage(null), 3000);
         }
-        setLoading(false);
-    }
-
-    async function saveChannels() {
-        if (!config) return;
-        setSaving(true);
-
-        const currentChannels = config.logging?.channels || {};
-
-        const result = await api.guilds.updateConfig(guildId, {
-            logging: {
-                ...config.logging,
-                channels: {
-                    ...currentChannels,
-                    moderation: modLogChannel || undefined,
-                    messages: msgLogChannel || undefined,
-                    members: memberLogChannel || undefined,
-                },
-            },
-        });
-
-        if (result.data) {
-            setConfig(result.data);
-            setMessage({ type: 'success', text: 'Channel settings saved!' });
-        } else {
-            setMessage({ type: 'error', text: result.error || 'Failed to save' });
-        }
-
-        setSaving(false);
-        setTimeout(() => setMessage(null), 3000);
-    }
-
-    async function toggleEvent(event: keyof GuildConfig['logging']['events']) {
-        if (!config) return;
-
-        setSaving(true);
-        const currentEvents = config.logging?.events || {};
-        const newValue = !currentEvents[event];
-
-        const result = await api.guilds.updateConfig(guildId, {
-            logging: {
-                ...config.logging,
-                events: { ...currentEvents, [event]: newValue },
-            },
-        });
-
-        if (result.data) {
-            setConfig(result.data);
-            setMessage({ type: 'success', text: 'Settings saved!' });
-        } else {
-            setMessage({ type: 'error', text: result.error || 'Failed to save' });
-        }
-
-        setSaving(false);
-        setTimeout(() => setMessage(null), 3000);
-    }
+    };
 
     if (loading) {
         return (
             <div className={styles.loader}>
-                <div className={styles.spinner}></div>
+                <div className={styles.spinner} />
             </div>
         );
     }
 
-    if (!config) {
+    if (!originalConfig) {
         return <div className={styles.error}>Failed to load configuration</div>;
     }
 
-    const eventDescriptions: Record<keyof GuildConfig['logging']['events'], string> = {
-        messageDelete: 'Log when messages are deleted',
-        messageEdit: 'Log when messages are edited',
-        memberJoin: 'Log when members join the server',
-        memberLeave: 'Log when members leave the server',
-        modActions: 'Log moderation actions (warn, kick, ban, etc.)',
+    const eventLabels: Record<keyof LoggingConfig['events'], { label: string; description: string }> = {
+        messageDelete: { label: 'Message Deletes', description: 'Log when messages are deleted' },
+        messageEdit: { label: 'Message Edits', description: 'Log when messages are edited' },
+        memberJoin: { label: 'Member Joins', description: 'Log when members join the server' },
+        memberLeave: { label: 'Member Leaves', description: 'Log when members leave the server' },
+        modActions: { label: 'Mod Actions', description: 'Log moderation actions (warn, kick, ban, etc.)' },
     };
 
     return (
@@ -115,86 +106,107 @@ export default function LoggingPage() {
             </div>
 
             {message && (
-                <div className={`${styles.message} ${styles[message.type]}`}>
-                    {message.text}
-                </div>
+                <Message
+                    type={message.type}
+                    text={message.text}
+                    onDismiss={() => setMessage(null)}
+                />
             )}
 
-            <div className={styles.section}>
-                <h2 className={styles.sectionTitle}>Log Channels</h2>
-                <p className={styles.sectionDesc}>Configure where logs are sent</p>
+            <FormSection title="Master Toggle" icon="📋" description="Enable or disable the logging system">
+                <Toggle
+                    checked={form.value.enabled}
+                    onChange={(checked) => form.updateField('enabled', checked)}
+                    label="Enable Logging"
+                    description="When disabled, no events will be logged"
+                />
+            </FormSection>
 
-                <div className={styles.featureGrid}>
-                    <div className={styles.formCard}>
-                        <div className={styles.formRow}>
-                            <label className={styles.formLabel}>🛡️ Moderation Logs Channel ID</label>
-                            <input
-                                type="text"
-                                className={styles.input}
-                                value={modLogChannel}
-                                onChange={(e) => setModLogChannel(e.target.value)}
-                                placeholder="Channel ID"
-                            />
-                        </div>
-                        <div className={styles.formRow}>
-                            <label className={styles.formLabel}>💬 Message Logs Channel ID</label>
-                            <input
-                                type="text"
-                                className={styles.input}
-                                value={msgLogChannel}
-                                onChange={(e) => setMsgLogChannel(e.target.value)}
-                                placeholder="Channel ID"
-                            />
-                        </div>
-                        <div className={styles.formRow}>
-                            <label className={styles.formLabel}>👥 Member Logs Channel ID</label>
-                            <input
-                                type="text"
-                                className={styles.input}
-                                value={memberLogChannel}
-                                onChange={(e) => setMemberLogChannel(e.target.value)}
-                                placeholder="Channel ID"
-                            />
-                        </div>
-                        <button
-                            className={styles.saveBtn}
-                            onClick={saveChannels}
-                            disabled={saving}
+            {form.value.enabled && (
+                <>
+                    <FormSection title="Log Channels" icon="📍" description="Configure where different logs are sent">
+                        <FormField
+                            label="Moderation Logs Channel"
+                            description="Channel for ban, kick, warn, timeout logs"
+                            error={form.errors['channels.moderation' as keyof LoggingConfig]}
                         >
-                            {saving ? 'Saving...' : 'Save Channels'}
-                        </button>
-                    </div>
-                </div>
+                            <Input
+                                type="text"
+                                value={form.value.channels.moderation}
+                                onChange={(e) => form.setValue(prev => ({
+                                    ...prev,
+                                    channels: { ...prev.channels, moderation: e.target.value }
+                                }))}
+                                placeholder="Channel ID (e.g., 123456789012345678)"
+                                error={!!form.errors['channels.moderation' as keyof LoggingConfig]}
+                            />
+                        </FormField>
 
-                <div className={styles.infoBox}>
-                    💡 Paste the Channel ID where you want logs to appear. To get a Channel ID, enable Developer Mode in Discord settings, right-click a channel, and click "Copy ID".
-                </div>
-            </div>
+                        <FormField
+                            label="Message Logs Channel"
+                            description="Channel for message edit/delete logs"
+                            error={form.errors['channels.messages' as keyof LoggingConfig]}
+                        >
+                            <Input
+                                type="text"
+                                value={form.value.channels.messages}
+                                onChange={(e) => form.setValue(prev => ({
+                                    ...prev,
+                                    channels: { ...prev.channels, messages: e.target.value }
+                                }))}
+                                placeholder="Channel ID (e.g., 123456789012345678)"
+                                error={!!form.errors['channels.messages' as keyof LoggingConfig]}
+                            />
+                        </FormField>
 
-            <div className={styles.section}>
-                <h2 className={styles.sectionTitle}>Event Toggles</h2>
-                <p className={styles.sectionDesc}>Enable or disable specific log events</p>
+                        <FormField
+                            label="Member Logs Channel"
+                            description="Channel for member join/leave logs"
+                            error={form.errors['channels.members' as keyof LoggingConfig]}
+                        >
+                            <Input
+                                type="text"
+                                value={form.value.channels.members}
+                                onChange={(e) => form.setValue(prev => ({
+                                    ...prev,
+                                    channels: { ...prev.channels, members: e.target.value }
+                                }))}
+                                placeholder="Channel ID (e.g., 123456789012345678)"
+                                error={!!form.errors['channels.members' as keyof LoggingConfig]}
+                            />
+                        </FormField>
 
-                <div className={styles.featureGrid}>
-                    {(Object.keys(config.logging?.events || {}) as Array<keyof typeof config.logging.events>).map(
-                        (event) => (
-                            <div key={event} className={styles.featureCard}>
-                                <div className={styles.featureInfo}>
-                                    <h3>{event.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase())}</h3>
-                                    <p>{eventDescriptions[event]}</p>
+                        <div className={styles.infoBox}>
+                            💡 To get a Channel ID, enable Developer Mode in Discord settings, right-click a channel, and click "Copy ID".
+                        </div>
+                    </FormSection>
+
+                    <FormSection title="Event Toggles" icon="⚡" description="Choose which events to log">
+                        <div className={styles.eventGrid}>
+                            {(Object.keys(eventLabels) as Array<keyof LoggingConfig['events']>).map((event) => (
+                                <div key={event} className={styles.eventCard}>
+                                    <Toggle
+                                        checked={form.value.events[event]}
+                                        onChange={(checked) => form.setValue(prev => ({
+                                            ...prev,
+                                            events: { ...prev.events, [event]: checked }
+                                        }))}
+                                        label={eventLabels[event].label}
+                                        description={eventLabels[event].description}
+                                    />
                                 </div>
-                                <button
-                                    className={`${styles.toggle} ${config.logging?.events?.[event] ? styles.active : ''}`}
-                                    onClick={() => toggleEvent(event)}
-                                    disabled={saving}
-                                >
-                                    <span className={styles.toggleKnob}></span>
-                                </button>
-                            </div>
-                        )
-                    )}
-                </div>
-            </div>
+                            ))}
+                        </div>
+                    </FormSection>
+                </>
+            )}
+
+            <SaveBar
+                show={form.isDirty}
+                saving={form.isSaving}
+                onSave={handleSave}
+                onCancel={form.reset}
+            />
         </div>
     );
 }

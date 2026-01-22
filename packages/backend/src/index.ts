@@ -7,7 +7,8 @@ import { authRouter, guildsRouter, commandsRouter, moderationRouter } from './ro
 import { generalLimiter } from './middleware/rateLimit.js';
 
 const app = express();
-const PORT = process.env.BACKEND_PORT || 3001;
+// Railway provides PORT env var, fallback to BACKEND_PORT for local dev
+const PORT = process.env.PORT || process.env.BACKEND_PORT || 3001;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/nova-bot';
 
 // Security middleware
@@ -19,7 +20,11 @@ app.use(cors({
 app.use(express.json());
 app.use(generalLimiter);
 
-// Health check
+// Health check - Railway checks root /health
+app.get('/health', (_req, res) => {
+    res.json({ status: 'ok' });
+});
+
 app.get('/api/health', (_req, res) => {
     res.json({
         status: 'ok',

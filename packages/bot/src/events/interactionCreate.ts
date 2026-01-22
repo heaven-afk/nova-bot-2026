@@ -5,9 +5,6 @@ import {
     ButtonInteraction,
     StringSelectMenuInteraction,
     ModalSubmitInteraction,
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
 } from 'discord.js';
 import { createEvent } from '../types/Event.js';
 import { configCache } from '../lib/cache.js';
@@ -95,7 +92,7 @@ async function handleButtonInteraction(interaction: ButtonInteraction, client: N
 
 // Select menu interaction handler
 async function handleSelectMenuInteraction(interaction: StringSelectMenuInteraction, client: NovaClient) {
-    const [action, ...args] = interaction.customId.split(':');
+    const [action] = interaction.customId.split(':');
     const selected = interaction.values[0];
 
     try {
@@ -156,7 +153,7 @@ async function handleSelectMenuInteraction(interaction: StringSelectMenuInteract
 
 // Modal submission handler
 async function handleModalSubmit(interaction: ModalSubmitInteraction, _client: NovaClient) {
-    const [action, ...args] = interaction.customId.split(':');
+    const [action] = interaction.customId.split(':');
 
     try {
         switch (action) {
@@ -184,7 +181,7 @@ async function handleModalSubmit(interaction: ModalSubmitInteraction, _client: N
                 const reportReason = interaction.fields.getTextInputValue('report_reason');
                 const reportDetails = interaction.fields.getTextInputValue('report_details');
 
-                console.log(`[Report] From ${interaction.user.tag} in ${interaction.guildId}: ${reportReason}`);
+                console.log(`[Report] From ${interaction.user.tag} in ${interaction.guildId}: ${reportReason} - ${reportDetails}`);
 
                 await interaction.reply({
                     content: '✅ Your report has been submitted. A moderator will review it.',

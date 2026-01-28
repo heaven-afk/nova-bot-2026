@@ -6,9 +6,9 @@ services:
   - type: web
     name: nova-bot-backend
     runtime: node
-    rootDir: packages/backend
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    rootDir: .
+    buildCommand: npm install && npm run build:backend
+    startCommand: npm run start:backend
     envVars:
       - key: NODE_ENV
         value: production
@@ -35,9 +35,9 @@ services:
   - type: worker
     name: nova-bot
     runtime: node
-    rootDir: packages/bot
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    rootDir: .
+    buildCommand: npm install && npm run build:bot
+    startCommand: npm run start:bot
     envVars:
       - key: NODE_ENV
         value: production

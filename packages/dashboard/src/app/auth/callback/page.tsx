@@ -12,15 +12,20 @@ function AuthCallbackContent() {
         const token = searchParams.get('token');
         const error = searchParams.get('error');
 
+        console.log('Auth Callback Debug:', { token: !!token, error }); // DEBUG
+
         if (error) {
+            console.error('Auth Error:', error); // DEBUG
             router.push(`/login?error=${error}`);
             return;
         }
 
         if (token) {
+            console.log('Setting token and redirecting...'); // DEBUG
             localStorage.setItem('token', token);
-            router.push('/dashboard');
+            window.location.href = '/dashboard'; // Force reload to ensure state updates
         } else {
+            console.error('No token found'); // DEBUG
             router.push('/login?error=no_token');
         }
     }, [router, searchParams]);

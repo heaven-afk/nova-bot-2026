@@ -18,7 +18,7 @@
     "start": "npm run start:bot",
     "lint": "npm run lint --workspaces --if-present"
   },
-  "devDependencies": {
+  "dependencies": {
     "typescript": "^5.3.3"
   },
   "engines": {

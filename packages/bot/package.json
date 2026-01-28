@@ -13,11 +13,11 @@
     },
     "dependencies": {
         "discord.js": "^14.14.1",
-        "dotenv": "^16.3.1"
-    },
-    "devDependencies": {
-        "@types/node": "^20.10.6",
+        "dotenv": "^16.3.1",
         "tsx": "^4.7.0",
         "typescript": "^5.3.3"
+    },
+    "devDependencies": {
+        "@types/node": "^20.10.6"
     }
 }

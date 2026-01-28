@@ -10,6 +10,12 @@
     "dev:backend": "npm run dev -w @nova/backend",
     "dev:dashboard": "npm run dev -w @nova/dashboard",
     "build": "npm run build -w @nova/bot && npm run build -w @nova/backend && npm run build -w @nova/dashboard",
+    "build:bot": "npm run build -w @nova/bot",
+    "build:backend": "npm run build -w @nova/backend",
+    "start:bot": "npm run start -w @nova/bot",
+    "start:backend": "npm run start -w @nova/backend",
+    "start:dashboard": "npm run start -w @nova/dashboard",
+    "start": "npm run start:bot",
     "lint": "npm run lint --workspaces --if-present"
   },
   "devDependencies": {

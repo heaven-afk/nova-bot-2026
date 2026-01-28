@@ -21,7 +21,8 @@ async function start() {
         await client.login(token);
     } catch (error) {
         console.error('Failed to start bot:', error);
-        process.exit(1);
+        // Wait 5 seconds before exiting to prevent tight restart loops (log spam)
+        setTimeout(() => process.exit(1), 5000);
     }
 }
 
